@@ -1,18 +1,25 @@
+import { editContact } from "../views/edit-contact";
+
+
+
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			
+			ContacList: [],
+			traerContactos: async () => {
+				const response = await fetch('https://playground.4geeks.com/contact/agendas/Hvaxquez/contacts/')
+					console.log(Response);
+					if(!response.ok) {
+						getActions().crearContacto()
+						return
+					}
+					const data = await response.json()
+					setStore({contacts: data.contacts})
+					console.log(data);
+			}, 
+			
+
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -37,7 +44,55 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
+			},
+			get: async() => {
+				const response = await fetch('https://playground.4geeks.com/contact/agendas/Hvaxquez/contacts');
+				const data = await response.json();
+				setStore({ContacList: data.contacts})
+				//return contacts;
+			},
+			 
+			
+			addContact: async (name, phone, email, address) => {
+				const response = await fetch ('https://playground.4geeks.com/contact/agendas/Hvaxquez/contacts', {
+					method: "POST",
+					body: JSON.stringify({name,phone,email,address}),
+					headers: {
+					  "Content-Type": "application/json"
+					}
+				  })
+                const data = await response.json()
+				getActions().get()
+				console.log(data)
+  
+
+
+			},
+
+			editContact: async (newContact, id) => {
+				const response = await fetch (`https://playground.4geeks.com/contact/agendas/Hvaxquez/contacts/${id}`,
+					{method:"PUT",body: JSON.stringify(newContact),
+					headers: {
+					  "Content-Type": "application/json"
+					}
+				}
+				)
+				const data = await response.json()
+				getActions().get()
+				console.log(data)
+
+			},
+
+			elimContact: async (id) => {
+				await fetch (`https://playground.4geeks.com/contact/agendas/Hvaxquez/contacts/${id}`,
+					{method: "DELETE",headers: {
+						"Content-Type": "application/json"
+					  }}
+				 )
+				 getActions().get()
 			}
+
+
 		}
 	};
 };
